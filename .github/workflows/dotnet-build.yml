@@ -49,6 +49,10 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"CIAppTest" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
           dotnet build
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Upload SonarQube report to Nexus
+        run: |
+          curl -v -u admin:Admin@123 --upload-file ./.sonar/scanner/report-task.txt http://18.134.9.1:8081/repository/maven-releases/sonarqube-report.txt
   dotnet_build:
     needs: sonarqube_analysis
     runs-on: ubuntu-latest
