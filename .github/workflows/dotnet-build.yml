@@ -49,6 +49,9 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"CIAppTest" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
           dotnet build
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+      - name: List SonarQube Scanner Directory
+        run: |
+          ls -la ./.sonar/scanner
 
       - name: Upload SonarQube report to Nexus
         run: |
