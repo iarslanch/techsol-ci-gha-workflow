@@ -95,7 +95,7 @@ jobs:
       - name: Publish Reports to Nexus
         run: |
           ls -R test-results
-          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} -T test-results.trx http://18.134.9.1:8081/repository/maven-releases/test-results.trx
+          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} -T test-results/CITestApp.Tests/TestResults/test_results.trx http://18.134.9.1:8081/repository/maven-releases/test-results.trx
         env:
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
