@@ -75,22 +75,11 @@ jobs:
           name: test-results
           path: '**/TestResults/*.trx'
     
-  publish_to_nexus:
-    needs: dotnet_build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Download Test Results Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: test-results
-          path: test-results
-
       - name: Publish Reports to Nexus
         run: |
-          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} -T test-results/*.trx http://18.134.9.1:8081/repository/maven-releases/test-results.trx
+            for file in test-results/*.trx; do
+              curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} -T "$file" http://18.134.9.1:8081/repository/maven-releases/group/artifact/version/$(basename "$file")
+            done
         env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+            NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+            NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
