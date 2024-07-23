@@ -13,12 +13,10 @@ namespace CITestApp.Tests
         }
 
         [TestMethod]
-        public void TestDivisionDivideByZero()
-        {
-            Calculator calculator = new Calculator();
-            float ans = calculator.Division(2, 0);
-            Assert.AreEqual(ans, 5);
-
-        }
+public void TestDivisionDivideByZero()
+{
+    Calculator calculator = new Calculator();
+    Assert.ThrowsException<System.DivideByZeroException>(() => calculator.Division(2, 0));
+}
     }
 }

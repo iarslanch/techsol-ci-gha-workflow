@@ -49,30 +49,48 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"CIAppTest" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
           dotnet build
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-      - name: List SonarQube Scanner Directory
-        run: |
-          ls -la ./.sonar/scanner
 
-      - name: Upload SonarQube report to Nexus
-        run: |
-          curl -v -u admin:Admin@123 --upload-file ./.sonar/scanner/report-task.txt http://18.134.9.1:8081/repository/maven-releases/sonarqube-report.txt
   dotnet_build:
     needs: sonarqube_analysis
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      name: Checkout code
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '8.0.x'
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Run tests
-      run: dotnet test --logger "trx;LogFileName=test_results.trx" ./CITestApp.Tests/CITestApp.Tests.csproj
-    - name: Publish Test Results
-      uses: actions/upload-artifact@v2
-      with:
-        name: test-results
-        path: '**/TestResults/*.trx'
+      - uses: actions/checkout@v2
+        name: Checkout code
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run tests
+        run: dotnet test --logger "trx;LogFileName=test_results.trx" ./CITestApp.Tests/CITestApp.Tests.csproj
+
+      - name: Publish Test Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: '**/TestResults/*.trx'
+    
+  publish_to_nexus:
+    needs: dotnet_build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download Test Results Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: test-results
+          path: test-results
+
+      - name: Publish Reports to Nexus
+        run: |
+          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} -T test-results/*.trx http://18.134.9.1:8081/repository/maven-releases/test-results.trx
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
